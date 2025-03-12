@@ -1,15 +1,17 @@
 package com.example.turtledreambackend.data.entity;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 
 @Document(collection = "user")
-@Data
+@SuperBuilder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User extends BaseEntity {

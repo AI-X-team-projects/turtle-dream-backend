@@ -6,4 +6,5 @@ import java.util.Optional;
 
 public interface UserRepository extends MongoRepository<User, String> {
 	Optional<User> findByUsername(String username); // 사용자 아이디를 기준으로 검색
+	boolean existsByUsername(String username); // 사용자 이름(username)이 존재하는지 확인하는 메서드
 }

@@ -4,17 +4,22 @@ import com.example.turtledreambackend.data.dto.UserRequestDTO;
 import com.example.turtledreambackend.data.dto.UserResponseDTO;
 import com.example.turtledreambackend.service.UserService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/user")
 public class UserController {
 	
 	private final UserService userService;
 	
-	public UserController(UserService userService) {
-		this.userService = userService;
+	// 사용자 아이디(username)가 사용 중인지 확인
+	@GetMapping("/check-username")
+	public ResponseEntity<Boolean> checkUsername(@RequestParam String username) {
+		boolean isAvailable = userService.isUsernameAvailable(username);
+		return ResponseEntity.ok(isAvailable);
 	}
 	
 	// 회원가입
