@@ -4,38 +4,39 @@ import com.example.turtledreambackend.data.dto.UserRequestDTO;
 import com.example.turtledreambackend.data.dto.UserResponseDTO;
 import com.example.turtledreambackend.data.entity.User;
 import com.example.turtledreambackend.data.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
+@RequiredArgsConstructor
 @Service
 public class UserService {
 	
 	private final UserRepository userRepository;
 	private final BCryptPasswordEncoder passwordEncoder;
 	
-	public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
-		this.userRepository = userRepository;
-		this.passwordEncoder = passwordEncoder;
+	
+	// 아이디 중복확인
+	public boolean isUsernameAvailable(String username) {
+		return !userRepository.existsByUsername(username); // 해당 username이 존재하지 않아야 true 반환
 	}
 	
 	// 회원가입
 	public UserResponseDTO register(UserRequestDTO dto) {
 		// 중복 체크
-		Optional<User> existingUser = userRepository.findByUsername(dto.getUsername());
-		if (existingUser.isPresent()) {
+		if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
 			throw new IllegalArgumentException("이미 존재하는 사용자 아이디입니다.");
 		}
 		
-		// User 엔티티 생성 및 저장
-		User user = new User();
-		user.setUsername(dto.getUsername());
-		user.setPassword(passwordEncoder.encode(dto.getPassword()));
-		user.setName(dto.getName());
-		user.setGender(dto.getGender());
-		user.setAge(dto.getAge());
-		user.setHeight(dto.getHeight());
+		// 🔥 Builder 패턴을 통한 객체 생성
+		User user = User.builder()
+				.username(dto.getUsername())
+				.password(passwordEncoder.encode(dto.getPassword()))
+				.name(dto.getName())
+				.gender(dto.getGender())
+				.age(dto.getAge())
+				.height(dto.getHeight())
+				.build();
 		
 		userRepository.save(user);
 		
@@ -54,14 +55,15 @@ public class UserService {
 		return toResponseDTO(user);
 	}
 	
+	// Entity → DTO 변환 메서드
 	private UserResponseDTO toResponseDTO(User user) {
-		UserResponseDTO dto = new UserResponseDTO();
-		dto.setId(user.getId());
-		dto.setUsername(user.getUsername());
-		dto.setName(user.getName());
-		dto.setGender(user.getGender());
-		dto.setAge(user.getAge());
-		dto.setHeight(user.getHeight());
-		return dto;
+		return UserResponseDTO.builder()
+				.id(user.getId())
+				.username(user.getUsername())
+				.name(user.getName())
+				.gender(user.getGender())
+				.age(user.getAge())
+				.height(user.getHeight())
+				.build();
 	}
 }
