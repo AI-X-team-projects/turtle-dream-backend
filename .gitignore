@@ -35,3 +35,12 @@ out/
 
 ### VS Code ###
 .vscode/
+
+## env
+.env
+
+# Mac
+.DS_Store
+
+# node_modules
+/node_modules
