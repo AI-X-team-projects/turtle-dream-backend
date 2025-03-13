@@ -20,7 +20,8 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(
 								"/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", // Swagger 관련 URL
-								"/api/user/register", "/api/user/login", "/api/user/check-username" // 회원가입 & 로그인 URL
+								"/api/user/register", "/api/user/login", "/api/user/check-username", // 회원가입 & 로그인 URL
+								"/ws/**", "/ws/posture/**" // WebSocket 엔드포인트
 						).permitAll() // 인증 없이 접근 허용
 						.anyRequest().authenticated() // 나머지 요청은 인증 필요
 				)
