@@ -10,6 +10,8 @@ import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import reactor.core.publisher.Mono;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -19,61 +21,20 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class PostureWebSocketHandler extends TextWebSocketHandler {
 	
+	private static final Logger logger = LoggerFactory.getLogger(PostureWebSocketHandler.class);
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private final PostureDataService postureDataService;
 	private static final String AI_SERVER_WS_URL = "ws://localhost:8001/ws/pose-detection";
 	
-	// JSON 파싱: 자세 상태(boolean) 추출
-	private boolean processResponseForPosture(String response) {
-		try {
-			JsonNode jsonNode = objectMapper.readTree(response);
-			return jsonNode.get("isGoodPosture").asBoolean();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-	
-	// JSON 파싱: 자세 상태 문자열 추출
-	private String extractStatusFromResponse(String response) {
-		try {
-			JsonNode jsonNode = objectMapper.readTree(response);
-			return jsonNode.get("postureStatus").asText();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "Unknown";
-		}
-	}
-	
-	// JSON 파싱: 피드백 생성
-	private String generateFeedbackFromResponse(String response) {
-		try {
-			JsonNode jsonNode = objectMapper.readTree(response);
-			return jsonNode.get("feedback").asText();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "Unable to determine posture.";
-		}
-	}
-	
-	// 사용자 ID 추출 (프론트엔드 URL 파라미터에서 추출)
-	private String extractUserIdFromSession(WebSocketSession session) {
-		String query = session.getUri().getQuery();
-		if (query != null && query.contains("userId=")) {
-			return query.split("userId=")[1].split("&")[0];
-		}
-		return "defaultUser";
-	}
-	
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		System.out.println("[INFO] 웹소켓 연결 성공: " + session.getId());
+		logger.info("웹소켓 연결 성공 - 세션: {}", session.getId());
 	}
 	
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 		String imageData = message.getPayload();
-		String userId = extractUserIdFromSession(session);
+		logger.debug("이미지 데이터 수신 - 세션: {}, 데이터 크기: {} bytes", session.getId(), imageData.length());
 		
 		try {
 			ReactorNettyWebSocketClient client = new ReactorNettyWebSocketClient();
@@ -83,35 +44,99 @@ public class PostureWebSocketHandler extends TextWebSocketHandler {
 									.map(msg -> {
 										DataBuffer buffer = msg.getPayload();
 										byte[] bytes = new byte[buffer.readableByteCount()];
-										buffer.read(bytes);  // DataBuffer → byte 배열로 변환
-										return new String(bytes, StandardCharsets.UTF_8); // byte 배열 → 문자열 변환
+										buffer.read(bytes);
+										return new String(bytes, StandardCharsets.UTF_8);
 									}))
-							.doOnNext(response -> {
-								System.out.println("[INFO] AI 서버 응답: " + response);
-								
-								boolean isGoodPosture = processResponseForPosture(response);
-								String postureStatus = extractStatusFromResponse(response);
-								String feedback = generateFeedbackFromResponse(response);
-								
-								postureDataService.savePostureData(userId, isGoodPosture, postureStatus, feedback);
-								
-								try {
-									session.sendMessage(new TextMessage(response));
-								} catch (IOException e) {
-									throw new RuntimeException(e);
-								}
-							})
+							.doOnNext(response -> handleAIServerResponse(session, response))
 							.then()
 			).block();
 		} catch (Exception e) {
-			session.sendMessage(new TextMessage("{\"error\":\"AI 서버와의 연결 실패\"}"));
-			e.printStackTrace();
+			logger.error("AI 서버 연결 실패 - 세션: {}", session.getId(), e);
+			sendErrorResponse(session, "AI 서버와의 연결 실패");
 		}
 	}
 	
-	
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		System.out.println("[INFO] 웹소켓 연결 종료: " + session.getId());
+		logger.info("웹소켓 연결 종료 - 세션: {}, 상태: {}", session.getId(), status);
+	}
+	
+	private void handleAIServerResponse(WebSocketSession session, String response) {
+		try {
+			logger.info("AI 서버 응답 수신 - 세션: {}", session.getId());
+			
+			boolean isGoodPosture = processResponseForPosture(response);
+			String postureStatus = extractStatusFromResponse(response);
+			String feedback = generateFeedbackFromResponse(response);
+			
+			// 메트릭스 데이터 처리
+			processMetricsFromResponse(response);
+			
+			// 자세 데이터 저장 (테스트용 임시 사용자 ID 사용)
+			postureDataService.savePostureData("test_user", isGoodPosture, postureStatus, feedback);
+			
+			// 클라이언트에 응답 전송
+			session.sendMessage(new TextMessage(response));
+			
+		} catch (IOException e) {
+			logger.error("응답 처리 중 오류 발생 - 세션: {}", session.getId(), e);
+			sendErrorResponse(session, "응답 처리 중 오류 발생");
+		}
+	}
+	
+	private void processMetricsFromResponse(String response) {
+		try {
+			JsonNode jsonNode = objectMapper.readTree(response);
+			JsonNode metrics = jsonNode.get("metrics");
+			if (metrics != null) {
+				double headTilt = metrics.get("head_tilt").asDouble();
+				double turtleNeckRatio = metrics.get("turtle_neck_ratio").asDouble();
+				
+				// 메트릭스 데이터 로깅만 수행
+				logger.debug("자세 메트릭스 - 머리 기울기: {}, 거북목 비율: {}",
+						headTilt, turtleNeckRatio);
+			}
+		} catch (Exception e) {
+			logger.error("메트릭스 처리 중 오류 발생", e);
+		}
+	}
+	
+	private boolean processResponseForPosture(String response) {
+		try {
+			JsonNode jsonNode = objectMapper.readTree(response);
+			return jsonNode.get("isGoodPosture").asBoolean();
+		} catch (Exception e) {
+			logger.error("자세 상태 처리 중 오류", e);
+			return false;
+		}
+	}
+	
+	private String extractStatusFromResponse(String response) {
+		try {
+			JsonNode jsonNode = objectMapper.readTree(response);
+			return jsonNode.get("postureStatus").asText();
+		} catch (Exception e) {
+			logger.error("자세 상태 문자열 추출 중 오류", e);
+			return "Unknown";
+		}
+	}
+	
+	private String generateFeedbackFromResponse(String response) {
+		try {
+			JsonNode jsonNode = objectMapper.readTree(response);
+			return jsonNode.get("feedback").asText();
+		} catch (Exception e) {
+			logger.error("피드백 생성 중 오류", e);
+			return "Unable to determine posture.";
+		}
+	}
+	
+	private void sendErrorResponse(WebSocketSession session, String errorMessage) {
+		try {
+			String errorResponse = String.format("{\"error\":\"%s\"}", errorMessage);
+			session.sendMessage(new TextMessage(errorResponse));
+		} catch (IOException e) {
+			logger.error("에러 메시지 전송 실패", e);
+		}
 	}
 }
