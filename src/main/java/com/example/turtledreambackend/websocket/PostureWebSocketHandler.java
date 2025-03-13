@@ -1,6 +1,6 @@
 package com.example.turtledreambackend.websocket;
 
-import com.example.turtledreambackend.service.PostureDataService;
+import com.example.turtledreambackend.service.posture.PostureDataService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.example.turtledreambackend.data.entity;
+package com.example.turtledreambackend.data.entity.posture;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

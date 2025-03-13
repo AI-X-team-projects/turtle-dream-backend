@@ -1,6 +1,6 @@
-package com.example.turtledreambackend.data.repository;
+package com.example.turtledreambackend.data.repository.posture;
 
-import com.example.turtledreambackend.data.entity.PostureTrends;
+import com.example.turtledreambackend.data.entity.posture.PostureTrends;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
