@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -51,6 +54,10 @@ public class UserService {
 		if (!passwordEncoder.matches(password, user.getPassword())) {
 			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
 		}
+
+		// 로그인 성공시 last_login update -김동규
+		user.setLastLogin(Instant.now());
+		userRepository.save(user);
 		
 		return toResponseDTO(user);
 	}

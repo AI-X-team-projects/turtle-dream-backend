@@ -23,7 +23,8 @@ public class SecurityConfig {
 						.requestMatchers(
 								"/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", // Swagger 관련 URL
 								"/api/user/register", "/api/user/login", "/api/user/logout", "/api/user/check-username", // 회원가입 & 로그인 URL
-								"/ws/**", "/ws/posture/**" // WebSocket 엔드포인트
+								"/ws/**", "/ws/posture/**", // WebSocket 엔드포인트
+								"/api/posture/**", "/api/ai/**"
 						).permitAll() // 인증 없이 접근 허용
 						.anyRequest().authenticated() // 나머지 요청은 인증 필요
 				)
@@ -37,10 +38,10 @@ public class SecurityConfig {
 						.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()) // 리다이렉션 대신 상태 코드 반환
 						.permitAll()
 				);
-		
+
 		return http.build();
 	}
-	
+
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder(12);

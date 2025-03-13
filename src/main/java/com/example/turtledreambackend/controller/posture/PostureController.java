@@ -32,7 +32,10 @@ public class PostureController {
     @GetMapping("/daily")
     public ResponseEntity<List<PostureData>> getDailyPosture(
             @RequestParam String userId,
-            @RequestParam String date) {
+            @RequestParam(required = false) String date) {
+        if (date == null || date.isEmpty()) {
+            date = LocalDate.now().toString();
+        }
         LocalDate localDate = LocalDate.parse(date);
         List<PostureData> data = postureService.getDailyPostureData(userId, localDate);
         return ResponseEntity.ok(data);

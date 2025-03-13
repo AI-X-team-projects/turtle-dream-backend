@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 /**
@@ -52,10 +53,11 @@ public class User {
 	private double height;  // 키 (단위: cm)
 
 	@CreatedDate
-	private LocalDateTime createdAt;  // 가입 날짜
+	private Instant createdAt;  // 가입 날짜
 
 	@LastModifiedDate
-	private LocalDateTime lastLogin;  // 마지막 로그인 시간
+	private Instant lastLogin;  // 마지막 로그인 시간
 
 	private String postureDataRef;  // 거북목 감지 데이터와 연결 (posture_logs 컬렉션 ID)
+
 }

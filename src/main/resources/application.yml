@@ -13,5 +13,5 @@ spring:
 logging:
   level:
     com.example.turtledreambackend: DEBUG  # 패키지별 로그 레벨 설정
-    # org.springframework.security: DEBUG 
+    org.springframework.security: DEBUG
     root: INFO  # 전체 로그 레벨 설정
