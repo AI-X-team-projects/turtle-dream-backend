@@ -1,13 +1,15 @@
 package com.example.turtledreambackend.service.posture;
 
-import com.example.turtledreambackend.data.entity.posture.PostureData;
-import com.example.turtledreambackend.data.repository.posture.PostureDataRepository;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
-import java.util.Map;
+import com.example.turtledreambackend.data.entity.posture.PostureData;
+import com.example.turtledreambackend.data.repository.posture.PostureDataRepository;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * 최초 작성자 : 김동규
@@ -23,7 +25,7 @@ public class PostureAIService {
     private final PostureDataRepository postureDataRepository;
     private final RestTemplate restTemplate;
 
-    private static final String AI_SERVER_URL = "ws://localhost:8001/ws/pose-detection";
+    private static final String AI_SERVER_URL = "http://localhost:8001/analyze-posture";
 
     /**
      * AI 서버에서 데이터를 받아 MongoDB에 저장

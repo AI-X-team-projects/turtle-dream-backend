@@ -1,11 +1,12 @@
 package com.example.turtledreambackend.config;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.core.MongoTemplate;
+
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 
 /**
  * 최초 작성자 : 김동규
@@ -20,11 +21,28 @@ public class MongoConfig {
 
     @Bean
     public MongoClient mongoClient() {
-        return MongoClients.create("mongodb://localhost:27017");
+        try {
+            System.out.println("MongoDB 연결 시도: mongodb://localhost:27017");
+            MongoClient client = MongoClients.create("mongodb://localhost:27017");
+            System.out.println("MongoDB 연결 성공");
+            return client;
+        } catch (Exception e) {
+            System.err.println("MongoDB 연결 실패: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Bean
     public MongoTemplate mongoTemplate() {
-        return new MongoTemplate(mongoClient(), "turtledream");
+        try {
+            MongoTemplate template = new MongoTemplate(mongoClient(), "turtledream");
+            System.out.println("MongoDB 템플릿 생성 성공: turtledream");
+            return template;
+        } catch (Exception e) {
+            System.err.println("MongoDB 템플릿 생성 실패: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 }
