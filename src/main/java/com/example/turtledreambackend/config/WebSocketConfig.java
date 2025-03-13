@@ -15,6 +15,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 		registry.addHandler(postureWebSocketHandler, "/ws/posture")
-				.setAllowedOrigins("*");  // CORS 허용
+				.setAllowedOrigins("http://localhost:3000")  // 프론트엔드 도메인 명시
+				.withSockJS();  // SockJS 지원 추가 (옵션)
 	}
 }
