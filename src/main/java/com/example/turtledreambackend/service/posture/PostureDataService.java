@@ -1,11 +1,17 @@
-package com.example.turtledreambackend.service;
+package com.example.turtledreambackend.service.posture;
 
-import com.example.turtledreambackend.data.entity.PostureData;
-import com.example.turtledreambackend.data.repository.PostureDataRepository;
+import com.example.turtledreambackend.data.entity.posture.PostureData;
+import com.example.turtledreambackend.data.repository.posture.PostureDataRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-
+/**
+ * 최초 작성자 : 김동규
+ * 최초 작성일 : 2025-03-13
+ *
+ * 자세 데이타를 저장하기 위한 서비스
+ *
+ */
 @Service
 @RequiredArgsConstructor
 public class PostureDataService {

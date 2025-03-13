@@ -1,5 +1,6 @@
-package com.example.turtledreambackend.data.entity;
+package com.example.turtledreambackend.data.entity.posture;
 
+import com.example.turtledreambackend.data.entity.BaseEntity;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
