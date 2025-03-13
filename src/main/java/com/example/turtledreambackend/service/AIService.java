@@ -9,7 +9,7 @@ public class AIService {
 	private final RestTemplate restTemplate = new RestTemplate();
 	
 	public String sendImageToAIServer(String imageData) {
-		String aiServerUrl = "http://localhost:8000/api/pose";  // FastAPI 주소
+		String aiServerUrl = "http://localhost:8001/api/pose";  // FastAPI 주소
 		return restTemplate.postForObject(aiServerUrl, imageData, String.class);
 	}
 }

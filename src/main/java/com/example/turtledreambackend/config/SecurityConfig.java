@@ -3,13 +3,12 @@ package com.example.turtledreambackend.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -51,7 +50,7 @@ public class SecurityConfig {
 	@Bean
 	public UrlBasedCorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration corsConfiguration = new CorsConfiguration();
-		corsConfiguration.addAllowedOrigin("http://localhost:3000"); // 프론트엔드 URL
+		corsConfiguration.addAllowedOrigin("http://localhost:3000"); // 프론트엔드 URL을 명시적으로 지정
 		corsConfiguration.addAllowedMethod("*"); // 모든 HTTP 메소드 허용 (GET, POST 등)
 		corsConfiguration.addAllowedHeader("*"); // 모든 요청 Header 허용
 		corsConfiguration.setAllowCredentials(true); // 쿠키 및 인증 정보 허용
