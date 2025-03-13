@@ -9,3 +9,7 @@ spring:
       host: localhost
       port: 27017
       database: turtledream
+
+logging:
+  level:
+    org.springframework.security: DEBUG
