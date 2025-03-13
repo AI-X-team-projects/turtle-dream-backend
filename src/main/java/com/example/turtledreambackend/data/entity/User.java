@@ -1,9 +1,6 @@
 package com.example.turtledreambackend.data.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -59,8 +56,6 @@ public class User {
 
 	@LastModifiedDate
 	private LocalDateTime lastLogin;  // 마지막 로그인 시간
-
-	private String alertPreference;  // 알림 설정 (예: "ON", "OFF")
 
 	private String postureDataRef;  // 거북목 감지 데이터와 연결 (posture_logs 컬렉션 ID)
 }
