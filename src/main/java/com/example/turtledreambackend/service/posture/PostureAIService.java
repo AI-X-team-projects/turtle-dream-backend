@@ -31,6 +31,8 @@ public class PostureAIService {
     public PostureData analyzeAndSavePosture(String userId) {
         Map<String, Object> response = restTemplate.getForObject(AI_SERVER_URL, Map.class);
 
+        System.out.println("ai 서버 응답 : " + response);
+
         PostureData postureData = PostureData.builder()
                 .userId(userId)
                 .isGoodPosture((boolean) response.get("is_good_posture"))
