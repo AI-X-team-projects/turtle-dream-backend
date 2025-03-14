@@ -19,6 +19,11 @@ import com.mongodb.client.MongoClients;
 @EnableMongoAuditing
 public class MongoConfig {
 
+    /**
+     * MongoDB 클라이언트 객체를 생성하는 Bean
+     *
+     * @return MongoClient 객체 (MongoDB 연결)
+     */
     @Bean
     public MongoClient mongoClient() {
         try {
@@ -33,6 +38,11 @@ public class MongoConfig {
         }
     }
 
+    /**
+     * MongoTemplate 객체를 생성하는 Bean
+     *
+     * @return MongoTemplate 객체 (MongoDB와의 상호작용을 위한 템플릿)
+     */
     @Bean
     public MongoTemplate mongoTemplate() {
         try {

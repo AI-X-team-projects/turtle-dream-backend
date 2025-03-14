@@ -38,8 +38,8 @@ public class UserController {
 	
 	// 로그인
 	@PostMapping("/login")
-	public ResponseEntity<UserResponseDTO> login(@RequestParam String username, @RequestParam String password) {
-		UserResponseDTO responseDTO = userService.login(username, password);
+	public ResponseEntity<UserResponseDTO> login(@RequestBody UserRequestDTO loginRequest) {
+		UserResponseDTO responseDTO = userService.login(loginRequest.getUsername(), loginRequest.getPassword());
 		return ResponseEntity.ok(responseDTO);
 	}
 }
