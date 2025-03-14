@@ -1,6 +1,5 @@
 package com.example.turtledreambackend.controller;
 
-import org.apache.coyote.Request;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,8 +38,8 @@ public class UserController {
 	
 	// 로그인
 	@PostMapping("/login")
-	public ResponseEntity<UserResponseDTO> login(@RequestBody UserRequestDTO requestDTO) {
-		UserResponseDTO responseDTO = userService.login(requestDTO.getUsername(),requestDTO.getPassword() );
+	public ResponseEntity<UserResponseDTO> login(@RequestParam String username, @RequestParam String password) {
+		UserResponseDTO responseDTO = userService.login(username, password);
 		return ResponseEntity.ok(responseDTO);
 	}
 }
