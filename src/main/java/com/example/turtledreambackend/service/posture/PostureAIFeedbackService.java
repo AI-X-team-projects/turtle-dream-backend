@@ -112,17 +112,17 @@ public class PostureAIFeedbackService {
                 오늘도 작은 실천이 큰 변화를 만듭니다. 화이팅입니다! 💚
                 """, userId, userId, totalDuration / 60, totalBadDuration / 60, badPercentage);
 
-        return callOpenAI(prompt);
+        return callOpenAI(prompt,userId);
     }
 
     // ✅ OpenAI API 호출
-    private String callOpenAI(String prompt) {
+    private String callOpenAI(String prompt,String userId) {
 
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-4",
                 "messages", List.of(
                         Map.of("role", "system", "content", "당신은 전문적인 자세 코치입니다."),
-                        Map.of("role", "user", "content", prompt)
+                        Map.of("role", "user", "content", prompt + "\n\n 사용자 ID : "+userId)
                 ),
                 "max_tokens", 500
         );
