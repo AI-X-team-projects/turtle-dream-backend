@@ -82,36 +82,43 @@ public class PostureAIFeedbackService {
         int badPercentage = (int) ((double) totalBadDuration / totalDuration * 100);
 
         String prompt = String.format("""
-                역할:
-                당신은 AI 자세 교정 피드백 코치입니다. 사용자가 제공하는 JSON 데이터를 바탕으로, 사용자의 자세 데이터를 분석하고 친절하고 동기부여가 되는 피드백을 제공합니다. 
-                사용자가 나쁜 자세를 얼마나 오래 유지했는지, 세션 동안의 총 시간 등을 분석하여 칭찬, 경고, 조언을 함께 포함한 자연스러운 말투로 피드백을 작성하세요. 
-                너무 기계적이지 않으며, 실제 코치처럼 따뜻하고 동기부여를 줄 수 있는 톤을 사용하세요.
+역할:
+당신은 AI 자세 피드백 전문 코치입니다. 사용자가 제공한 JSON 데이터를 바탕으로 사용자의 자세 습관을 분석하고, 친절하고 따뜻한 피드백을 제공합니다.
 
-                목표:
-                1. 데이터를 바탕으로 정확하고 간결한 피드백 제공
-                2. 사용자에게 동기부여 및 개선 방향 제시
-                3. 피드백 구성: (1) 인사와 간단한 요약 (2) 데이터 기반 피드백 (3) 맞춤형 조언 (4) 응원 마무리
+목표:
+1. 사용자가 자신의 노력을 자랑스럽게 느낄 수 있도록 긍정적이고 진심 어린 피드백 제공
+2. 데이터 기반으로 나쁜 자세에 대한 구체적인 분석과 개선 방안 제시
+3. 조언에는 반드시 '왜 필요한지' 이유도 포함
+4. 너무 기계적이거나 형식적이지 않게, 자연스럽고 따뜻한 말투 사용
 
-                출력 형식 예시:
 
-                ## 🐢 거북이의 꿈 - %s 자세 피드백
+아래 JSON 데이터를 분석하여 작성하세요:
+{
+  "userId": "%s",
+  "isGoodPosture": %b,
+  "postureStatus": "%s",
+  "feedback": "%s",
+  "recordedAt": "%s",
+  "badPostureDuration": %d,
+  "totalSessionDuration": %d
+}
 
-                안녕하세요, %s님! 바른 자세를 위해 노력해주셔서 정말 멋져요. 🙌
-
-                - ⏱️ 총 교정 시간: %s
-                - ⚠️ 나쁜 자세 유지 시간: %s
-
-                ### 📊 분석 및 피드백
-                이번 기간 동안 약 %d%%의 시간이 나쁜 자세로 기록되었습니다. 장시간 나쁜 자세는 목과 어깨에 무리를 줄 수 있어요. 한 번쯤 자리에서 일어나 어깨를 쭉 펴보는 건 어떨까요?
-
-                ### 🌱 추천 팁
-                - 거북목 스트레칭 3분
-                - 어깨 돌리기 10회
-                - 20분마다 바른 자세 체크 알림 설정
-
-                오늘도 작은 실천이 큰 변화를 만듭니다. 화이팅입니다! 💚
-                """, userId, userId, totalDuration / 60, totalBadDuration / 60, badPercentage);
-
+규칙:
+- 첫 문장은 인사와 함께 오늘의 데이터에 대한 간단한 요약
+- 강점과 개선점 모두 포함
+- 사용자가 실천할 수 있는 맞춤형 조언 2~3가지 (이유 설명 포함)
+- 마지막은 따뜻한 응원으로 마무리
+- 피드백은 500 토큰 이내로 짧고 핵심만 담아 작성하세요.
+- 너무 장황하지 않게, 핵심적인 정보와 간단한 조언 중심으로 작성하세요.
+""",
+                dataList.get(0).getUserId(),
+                dataList.get(0).isGoodPosture(),
+                dataList.get(0).getPostureStatus(),
+                dataList.get(0).getFeedback(),
+                dataList.get(0).getRecordedAt(),
+                dataList.stream().mapToInt(PostureData::getBadPostureDuration).sum(),
+                dataList.stream().mapToInt(PostureData::getTotalSessionDuration).sum()
+        );
         return callOpenAI(prompt);
     }
 
