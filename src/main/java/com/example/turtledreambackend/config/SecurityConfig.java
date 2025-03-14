@@ -12,7 +12,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
-	
+
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
@@ -23,7 +23,7 @@ public class SecurityConfig {
 								"/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", // Swagger 관련 URL
 								"/api/user/register", "/api/user/login", "/api/user/logout", "/api/user/check-username", // 회원가입 & 로그인 URL
 								"/ws/**", "/ws/posture/**", // WebSocket 엔드포인트
-								"/api/posture/**", "/api/ai/**"
+								"/api/posture/**", "/api/ai/**","https://api.openai.com/v1/chat/completions"
 						).permitAll() // 인증 없이 접근 허용
 						.anyRequest().authenticated() // 나머지 요청은 인증 필요
 				)
@@ -45,7 +45,7 @@ public class SecurityConfig {
 	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder(12);
 	}
-	
+
 	// CORS 설정을 Security와 통합
 	@Bean
 	public UrlBasedCorsConfigurationSource corsConfigurationSource() {
@@ -54,10 +54,10 @@ public class SecurityConfig {
 		corsConfiguration.addAllowedMethod("*"); // 모든 HTTP 메소드 허용 (GET, POST 등)
 		corsConfiguration.addAllowedHeader("*"); // 모든 요청 Header 허용
 		corsConfiguration.setAllowCredentials(true); // 쿠키 및 인증 정보 허용
-		
+
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", corsConfiguration); // 모든 엔드포인트에 CORS 설정 적용
-		
+
 		return source;
 	}
 }

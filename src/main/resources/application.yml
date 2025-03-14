@@ -13,3 +13,10 @@ spring:
   websocket:
     max-text-message-size: 10MB
     max-binary-message-size: 10MB
+    
+logging:
+  level:
+    com.example.turtledreambackend: DEBUG  # 패키지별 로그 레벨 설정
+    org.springframework.security: DEBUG
+    root: INFO  # 전체 로그 레벨 설정
+
