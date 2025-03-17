@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 /**
- * 최초 작성자 : 류재형
+ * 최초 작성자 : 류재영
  * 최초 작성일 : 2025-03-12
  *
  * 수정자 : 김동규
