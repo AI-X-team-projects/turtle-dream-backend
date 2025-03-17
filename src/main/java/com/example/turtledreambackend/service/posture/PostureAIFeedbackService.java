@@ -92,89 +92,84 @@ public class PostureAIFeedbackService {
     public String generateFeedbackFromList(List<PostureData> dataList, String userId) {
         if (dataList.isEmpty()) return "해당 기간 동안 기록된 자세 데이터가 없습니다.";
 
-        // 총합 계산
-        int totalDuration = dataList.stream().mapToInt(PostureData::getTotalSessionDuration).sum();
-        int totalBadDuration = dataList.stream().mapToInt(PostureData::getBadPostureDuration).sum();
-        int badPercentage = (int) ((double) totalBadDuration / totalDuration * 100);
+        // ✅ 1. 총합 계산
+        int totalDuration = dataList.stream().mapToInt(PostureData::getTotalSessionDuration).sum(); // 총 교정 시간
+        int totalBadDuration = dataList.stream().mapToInt(PostureData::getBadPostureDuration).sum(); // 총 나쁜 자세 시간
+        int badPercentage = totalDuration > 0 ? (int) ((double) totalBadDuration / totalDuration * 100) : 0;
 
-        // ✅ JSON 형식 데이터 목록 생성
-        StringBuilder jsonData = new StringBuilder();
-        jsonData.append("[\n");
-        for (PostureData data : dataList) {
-            jsonData.append(String.format("""
-            {
-              "userId": "%s",
-              "isGoodPosture": %b,
-              "postureStatus": "%s",
-              "feedback": "%s",
-              "recordedAt": "%s",
-              "badPostureDuration": %d,
-              "totalSessionDuration": %d
-            },
-            """,
-                    data.getUserId(),
-                    data.isGoodPosture(),
-                    data.getPostureStatus(),
-                    data.getFeedback(),
-                    data.getRecordedAt(),
-                    data.getBadPostureDuration(),
-                    data.getTotalSessionDuration()
-            ));
-        }
-        // 마지막 쉼표 제거
-        if (jsonData.lastIndexOf(",") != -1) {
-            jsonData.deleteCharAt(jsonData.lastIndexOf(","));
-        }
-        jsonData.append("\n]");
+        // ✅ 2. 나쁜 자세 횟수, 좋은 자세 횟수 등 추가 통계
+        long goodPostureCount = dataList.stream().filter(PostureData::isGoodPosture).count();
+        long badPostureCount = dataList.stream().filter(p -> !p.isGoodPosture()).count();
 
-        // ✅ 프롬프트 (JSON 데이터 반영)
-        String prompt = String.format("""
-            역할:
-            당신은 AI 자세 교정 피드백 코치입니다. 사용자가 제공하는 JSON 데이터를 바탕으로, 사용자의 자세 데이터를 분석하고 친절하고 동기부여가 되는 피드백을 제공합니다. 
-            사용자가 나쁜 자세를 얼마나 오래 유지했는지, 세션 동안의 총 시간 등을 분석하여 칭찬, 경고, 조언을 함께 포함한 자연스러운 말투로 피드백을 작성하세요. 
-            너무 기계적이지 않으며, 실제 코치처럼 따뜻하고 동기부여를 줄 수 있는 톤을 사용하세요.
-
-            목표:
-            1. 데이터를 바탕으로 정확하고 간결한 피드백 제공
-            2. 사용자에게 동기부여 및 개선 방향 제시
-            3. 피드백 구성: (1) 인사와 간단한 요약 (2) 데이터 기반 피드백 (3) 맞춤형 조언 (4) 응원 마무리
-
-            아래는 출력 형식 예시(참고용으로만 사용할 것):
-
-            ## 🐢 거북이의 꿈 - %s 자세 피드백
-
-            안녕하세요, %s님! 바른 자세를 위해 노력해주셔서 정말 멋져요. 🙌
-
-            - ⏱️ 총 교정 시간: %d분
-            - ⚠️ 나쁜 자세 유지 시간: %d분
-
-            ### 📊 분석 및 피드백
-            이번 기간 동안 약 %d%%의 시간이 나쁜 자세로 기록되었습니다. 장시간 나쁜 자세는 목과 어깨에 무리를 줄 수 있어요. 한 번쯤 자리에서 일어나 어깨를 쭉 펴보는 건 어떨까요?
-
-            ### 🌱 추천 팁
-            - 거북목 스트레칭 3분
-            - 어깨 돌리기 10회
-            - 20분마다 바른 자세 체크 알림 설정
-
-            오늘도 작은 실천이 큰 변화를 만듭니다. 화이팅입니다! 💚
-
-            아래는 사용자의 JSON 데이터입니다. 반드시 이 데이터를 바탕으로 피드백을 500토큰 이내로 작성하세요:
-
-            %s
-            """,
-                userId, userId,
-                totalDuration / 60, totalBadDuration / 60, badPercentage,
-                jsonData // ← 여기에 전체 리스트로 보냄
+        // ✅ 3. 통계 요약 JSON 형태로 만들기
+        String summaryData = String.format("""
+    {
+      "userId": "%s",
+      "totalSessionDuration": %d,
+      "totalBadPostureDuration": %d,
+      "badPosturePercentage": %d,
+      "goodPostureCount": %d,
+      "badPostureCount": %d
+    }
+    """,
+                userId,
+                totalDuration,
+                totalBadDuration,
+                badPercentage,
+                goodPostureCount,
+                badPostureCount
         );
 
+        // ✅ 4. 프롬프트 그대로 사용 + 통계만 추가
+        String prompt = String.format("""
+        역할:
+        당신은 AI 자세 교정 피드백 코치입니다. 사용자가 제공하는 JSON 데이터를 바탕으로, 사용자의 자세 데이터를 분석하고 친절하고 동기부여가 되는 피드백을 제공합니다. 
+        사용자가 나쁜 자세를 얼마나 오래 유지했는지, 세션 동안의 총 시간 등을 분석하여 칭찬, 경고, 조언을 함께 포함한 자연스러운 말투로 피드백을 작성하세요. 
+        너무 기계적이지 않으며, 실제 코치처럼 따뜻하고 동기부여를 줄 수 있는 톤을 사용하세요.
+
+        목표:
+        1. 데이터를 바탕으로 정확하고 간결한 피드백 제공
+        2. 사용자에게 동기부여 및 개선 방향 제시
+        3. 피드백 구성: (1) 인사와 간단한 요약 (2) 데이터 기반 피드백 (3) 맞춤형 조언 (4) 응원 마무리
+
+        아래는 출력 형식 예시(참고용으로만 사용할 것, 시간 단위는 분으로 통일할 것):
+
+        ## 🐢 거북이의 꿈 - %s 자세 피드백
+
+        안녕하세요, %s님! 바른 자세를 위해 노력해주셔서 정말 멋져요. 🙌
+
+        - ⏱️ 총 교정 시간: %d분
+        - ⚠️ 나쁜 자세 유지 시간: %d분
+
+        ### 📊 분석 및 피드백
+        이번 기간 동안 약 %d%%의 시간이 나쁜 자세로 기록되었습니다. 장시간 나쁜 자세는 목과 어깨에 무리를 줄 수 있어요. 한 번쯤 자리에서 일어나 어깨를 쭉 펴보는 건 어떨까요?
+
+        ### 🌱 추천 팁
+        - 거북목 스트레칭 3분
+        - 어깨 돌리기 10회
+        - 20분마다 바른 자세 체크 알림 설정
+
+        오늘도 작은 실천이 큰 변화를 만듭니다. 화이팅입니다! 💚
+
+        아래는 사용자의 통계 데이터입니다. 반드시 이 데이터를 바탕으로 피드백을 500토큰 이내로 작성하세요:
+
+        %s
+        """,
+                userId, userId,
+                totalDuration / 60, totalBadDuration / 60, badPercentage,
+                summaryData // ✅ 여기에 통계 데이터만!
+        );
+
+        // ✅ 5. GPT 호출
         return callOpenAI(prompt, userId);
     }
+
 
     // ✅ OpenAI API 호출
     private String callOpenAI(String prompt, String userId) {
 
         Map<String, Object> requestBody = Map.of(
-                "model", "gpt-4",
+                "model", "gpt-4o",
                 "messages", List.of(
                         Map.of("role", "system", "content", "당신은 전문적인 자세 코치입니다."),
                         Map.of("role", "user", "content", prompt + "\n\n사용자 ID: " + userId)
