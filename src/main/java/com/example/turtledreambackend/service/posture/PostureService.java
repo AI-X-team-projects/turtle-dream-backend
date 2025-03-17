@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -33,6 +34,12 @@ public class PostureService {
      * 일일 자세 데이터 조회
      */
     public List<PostureData> getDailyPostureData(String userId, LocalDate date) {
+
+        LocalDateTime startOfDay = date.atStartOfDay(ZoneId.of("Asia/Seoul")).toLocalDateTime();
+        LocalDateTime endOfDay = date.atTime(23, 59, 59).atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime();
+
+        System.out.println("조회 범위: " + startOfDay + " ~ " + endOfDay);
+
         return postureDataRepository.findByUserIdAndRecordedAtBetween(
                 userId, date.atStartOfDay(), date.plusDays(1).atStartOfDay());
     }
@@ -40,23 +47,12 @@ public class PostureService {
     /**
      * 월별 자세 데이터 조회
      */
-//    public List<PostureData> getMonthlyPostureData(String userId, int year, int month) {
-//        LocalDateTime start = LocalDate.of(year, month, 1).atStartOfDay();
-//        LocalDateTime end = start.plusMonths(1);
-//        return postureDataRepository.findByUserIdAndRecordedAtBetween(userId, start, end);
-//    }
+    public List<PostureData> getPostureDataByDateRange(String userId, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startOfDay = startDate.atStartOfDay(); // YYYY-MM-DDT00:00:00
+        LocalDateTime endOfDay = endDate.atTime(23, 59, 59); // YYYY-MM-DDT23:59:59
 
-    public List<PostureSummary> getMonthlyPostureData(String userId, int year, int month) {
-        String monthStr = String.format("%04d-%02d", year, month);
-        return postureSummaryRepository.findByUserIdAndSummaryDateStartingWith(userId, monthStr);
+        return postureRepository.findByUserIdAndRecordedAtBetween(userId, startOfDay, endOfDay);
     }
-
-
-//    public void savePosture(PostureData postureData) {
-//        postureData.setRecordedAt(LocalDateTime.now());  // 현재 시간 설정
-//        postureDataRepository.save(postureData);
-//        System.out.println("AI 분석 데이터 저장 완료: " + postureData);
-//    }
 
     /**
      *  포즈 데이터를 저장
