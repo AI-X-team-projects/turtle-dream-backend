@@ -13,6 +13,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+// 작성자: 김태원
+
 @Service
 @RequiredArgsConstructor
 public class PostureAIFeedbackService {
@@ -35,103 +37,149 @@ public class PostureAIFeedbackService {
         );
     }
 
-    // ✅ 이번 달 데이터 조회
-    public List<PostureData> getMonthlyPostureData(String userId) {
-        LocalDate today = LocalDate.now();
+    // ✅ 이번 달 데이터 조회 (기본: 이번 달, 선택: 기간 지정)
+    public List<PostureData> getMonthlyPostureData(String userId, LocalDate startDate, LocalDate endDate) {
+        LocalDate start;
+        LocalDate end;
+
+        // 사용자가 입력한 기간이 없으면 이번 달로 기본 설정
+        if (startDate == null || endDate == null) {
+            LocalDate today = LocalDate.now();
+            start = today.withDayOfMonth(1); // 이번 달 1일
+            end = today.withDayOfMonth(today.lengthOfMonth()); // 이번 달 마지막 날
+        } else {
+            start = startDate;
+            end = endDate;
+        }
+
+        // 조회
         return postureDataRepository.findByUserIdAndRecordedAtBetween(
                 userId,
-                today.withDayOfMonth(1).atStartOfDay(),
-                today.withDayOfMonth(today.lengthOfMonth()).atTime(23, 59, 59)
+                start.atStartOfDay(),
+                end.atTime(23, 59, 59)
         );
     }
 
-    // ✅ 임시 데이터 기반 피드백 생성 (테스트용)
-    public String generateFeedbackWithMockData(String userId) {
-        // 임시 데이터 리스트 생성
-        List<PostureData> mockDataList = List.of(
-                PostureData.builder()
-                        .userId(userId)
-                        .isGoodPosture(true)
-                        .postureStatus("GOOD")
-                        .feedback("좋은 자세입니다!")
-                        .recordedAt(LocalDateTime.now().minusMinutes(60)) // 60분 전
-                        .badPostureDuration(300) // 5분 (300초)
-                        .totalSessionDuration(3600) // 1시간 (3600초)
-                        .build(),
-                PostureData.builder()
-                        .userId(userId)
-                        .isGoodPosture(false)
-                        .postureStatus("BAD")
-                        .feedback("허리를 펴세요!")
-                        .recordedAt(LocalDateTime.now().minusMinutes(30)) // 30분 전
-                        .badPostureDuration(600) // 10분 (600초)
-                        .totalSessionDuration(1800) // 30분 (1800초)
-                        .build()
-        );
 
-        // 기존 피드백 생성 메서드 사용
-        return generateFeedbackFromList(mockDataList, userId);
-    }
+//    // ✅ 임시 데이터 기반 피드백 생성 (테스트용)
+//    public String generateFeedbackWithMockData(String userId) {
+//        // 임시 데이터 리스트 생성
+//        List<PostureData> mockDataList = List.of(
+//                PostureData.builder()
+//                        .userId(userId)
+//                        .isGoodPosture(true)
+//                        .postureStatus("GOOD")
+//                        .feedback("좋은 자세입니다!")
+//                        .recordedAt(LocalDateTime.now().minusMinutes(60)) // 60분 전
+//                        .badPostureDuration(300) // 5분 (300초)
+//                        .totalSessionDuration(3600) // 1시간 (3600초)
+//                        .build(),
+//                PostureData.builder()
+//                        .userId(userId)
+//                        .isGoodPosture(false)
+//                        .postureStatus("BAD")
+//                        .feedback("허리를 펴세요!")
+//                        .recordedAt(LocalDateTime.now().minusMinutes(30)) // 30분 전
+//                        .badPostureDuration(600) // 10분 (600초)
+//                        .totalSessionDuration(1800) // 30분 (1800초)
+//                        .build()
+//        );
+//
+//        // 기존 피드백 생성 메서드 사용
+//        return generateFeedbackFromList(mockDataList, userId);
+//    }
 
-    // ✅ 여러 데이터 기반 피드백 (일간, 월간 공통)
     public String generateFeedbackFromList(List<PostureData> dataList, String userId) {
         if (dataList.isEmpty()) return "해당 기간 동안 기록된 자세 데이터가 없습니다.";
 
+        // 총합 계산
         int totalDuration = dataList.stream().mapToInt(PostureData::getTotalSessionDuration).sum();
         int totalBadDuration = dataList.stream().mapToInt(PostureData::getBadPostureDuration).sum();
         int badPercentage = (int) ((double) totalBadDuration / totalDuration * 100);
 
+        // ✅ JSON 형식 데이터 목록 생성
+        StringBuilder jsonData = new StringBuilder();
+        jsonData.append("[\n");
+        for (PostureData data : dataList) {
+            jsonData.append(String.format("""
+            {
+              "userId": "%s",
+              "isGoodPosture": %b,
+              "postureStatus": "%s",
+              "feedback": "%s",
+              "recordedAt": "%s",
+              "badPostureDuration": %d,
+              "totalSessionDuration": %d
+            },
+            """,
+                    data.getUserId(),
+                    data.isGoodPosture(),
+                    data.getPostureStatus(),
+                    data.getFeedback(),
+                    data.getRecordedAt(),
+                    data.getBadPostureDuration(),
+                    data.getTotalSessionDuration()
+            ));
+        }
+        // 마지막 쉼표 제거
+        if (jsonData.lastIndexOf(",") != -1) {
+            jsonData.deleteCharAt(jsonData.lastIndexOf(","));
+        }
+        jsonData.append("\n]");
+
+        // ✅ 프롬프트 (JSON 데이터 반영)
         String prompt = String.format("""
-역할:
-당신은 AI 자세 피드백 전문 코치입니다. 사용자가 제공한 JSON 데이터를 바탕으로 사용자의 자세 습관을 분석하고, 친절하고 따뜻한 피드백을 제공합니다.
+            역할:
+            당신은 AI 자세 교정 피드백 코치입니다. 사용자가 제공하는 JSON 데이터를 바탕으로, 사용자의 자세 데이터를 분석하고 친절하고 동기부여가 되는 피드백을 제공합니다. 
+            사용자가 나쁜 자세를 얼마나 오래 유지했는지, 세션 동안의 총 시간 등을 분석하여 칭찬, 경고, 조언을 함께 포함한 자연스러운 말투로 피드백을 작성하세요. 
+            너무 기계적이지 않으며, 실제 코치처럼 따뜻하고 동기부여를 줄 수 있는 톤을 사용하세요.
 
-목표:
-1. 사용자가 자신의 노력을 자랑스럽게 느낄 수 있도록 긍정적이고 진심 어린 피드백 제공
-2. 데이터 기반으로 나쁜 자세에 대한 구체적인 분석과 개선 방안 제시
-3. 조언에는 반드시 '왜 필요한지' 이유도 포함
-4. 너무 기계적이거나 형식적이지 않게, 자연스럽고 따뜻한 말투 사용
+            목표:
+            1. 데이터를 바탕으로 정확하고 간결한 피드백 제공
+            2. 사용자에게 동기부여 및 개선 방향 제시
+            3. 피드백 구성: (1) 인사와 간단한 요약 (2) 데이터 기반 피드백 (3) 맞춤형 조언 (4) 응원 마무리
 
+            아래는 출력 형식 예시(참고용으로만 사용할 것):
 
-아래 JSON 데이터를 분석하여 작성하세요:
-{
-  "userId": "%s",
-  "isGoodPosture": %b,
-  "postureStatus": "%s",
-  "feedback": "%s",
-  "recordedAt": "%s",
-  "badPostureDuration": %d,
-  "totalSessionDuration": %d
-}
+            ## 🐢 거북이의 꿈 - %s 자세 피드백
 
-규칙:
-- 첫 문장은 인사와 함께 오늘의 데이터에 대한 간단한 요약
-- 강점과 개선점 모두 포함
-- 사용자가 실천할 수 있는 맞춤형 조언 2~3가지 (이유 설명 포함)
-- 마지막은 따뜻한 응원으로 마무리
-- 피드백은 500 토큰 이내로 짧고 핵심만 담아 작성하세요.
-- 너무 장황하지 않게, 핵심적인 정보와 간단한 조언 중심으로 작성하세요.
-""",
-                dataList.get(0).getUserId(),
-                dataList.get(0).isGoodPosture(),
-                dataList.get(0).getPostureStatus(),
-                dataList.get(0).getFeedback(),
-                dataList.get(0).getRecordedAt(),
-                dataList.stream().mapToInt(PostureData::getBadPostureDuration).sum(),
-                dataList.stream().mapToInt(PostureData::getTotalSessionDuration).sum()
+            안녕하세요, %s님! 바른 자세를 위해 노력해주셔서 정말 멋져요. 🙌
+
+            - ⏱️ 총 교정 시간: %d분
+            - ⚠️ 나쁜 자세 유지 시간: %d분
+
+            ### 📊 분석 및 피드백
+            이번 기간 동안 약 %d%%의 시간이 나쁜 자세로 기록되었습니다. 장시간 나쁜 자세는 목과 어깨에 무리를 줄 수 있어요. 한 번쯤 자리에서 일어나 어깨를 쭉 펴보는 건 어떨까요?
+
+            ### 🌱 추천 팁
+            - 거북목 스트레칭 3분
+            - 어깨 돌리기 10회
+            - 20분마다 바른 자세 체크 알림 설정
+
+            오늘도 작은 실천이 큰 변화를 만듭니다. 화이팅입니다! 💚
+
+            아래는 사용자의 JSON 데이터입니다. 반드시 이 데이터를 바탕으로 피드백을 500토큰 이내로 작성하세요:
+
+            %s
+            """,
+                userId, userId,
+                totalDuration / 60, totalBadDuration / 60, badPercentage,
+                jsonData // ← 여기에 전체 리스트로 보냄
         );
-        return callOpenAI(prompt);
+
+        return callOpenAI(prompt, userId);
     }
 
     // ✅ OpenAI API 호출
-    private String callOpenAI(String prompt) {
+    private String callOpenAI(String prompt, String userId) {
 
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-4",
                 "messages", List.of(
                         Map.of("role", "system", "content", "당신은 전문적인 자세 코치입니다."),
-                        Map.of("role", "user", "content", prompt)
+                        Map.of("role", "user", "content", prompt + "\n\n사용자 ID: " + userId)
                 ),
-                "max_tokens", 500
+                "max_tokens", 700
         );
 
         HttpHeaders headers = new HttpHeaders();
