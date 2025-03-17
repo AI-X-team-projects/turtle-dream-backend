@@ -27,9 +27,9 @@ public class MongoConfig {
     @Bean
     public MongoClient mongoClient() {
         try {
-            System.out.println("MongoDB 연결 시도: mongodb://localhost:27017");
+//            System.out.println("MongoDB 연결 시도: mongodb://localhost:27017");
             MongoClient client = MongoClients.create("mongodb://localhost:27017");
-            System.out.println("MongoDB 연결 성공");
+//            System.out.println("MongoDB 연결 성공");
             return client;
         } catch (Exception e) {
             System.err.println("MongoDB 연결 실패: " + e.getMessage());
@@ -47,7 +47,7 @@ public class MongoConfig {
     public MongoTemplate mongoTemplate() {
         try {
             MongoTemplate template = new MongoTemplate(mongoClient(), "turtledream");
-            System.out.println("MongoDB 템플릿 생성 성공: turtledream");
+//            System.out.println("MongoDB 템플릿 생성 성공: turtledream");
             return template;
         } catch (Exception e) {
             System.err.println("MongoDB 템플릿 생성 실패: " + e.getMessage());
