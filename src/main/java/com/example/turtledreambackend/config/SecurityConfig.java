@@ -10,6 +10,13 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+/**
+ * 작성자 : 류재영
+ * 작성일 : 2025-03-12
+ *
+ * security 설정을 위한 파일
+ */
+
 @Configuration
 public class SecurityConfig {
 

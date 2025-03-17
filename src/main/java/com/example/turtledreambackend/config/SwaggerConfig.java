@@ -7,6 +7,13 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * 작성자 : 류재영
+ * 작성일 : 2025-03-12
+ *
+ * swagger-ui 설정을 위한 파일
+ */
+
 @Configuration
 public class SwaggerConfig {
 	
