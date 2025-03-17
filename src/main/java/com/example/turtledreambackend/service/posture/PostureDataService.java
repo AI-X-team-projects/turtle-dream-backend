@@ -35,7 +35,7 @@ public class PostureDataService {
 					.build();
 			
 			PostureData savedData = repository.save(data);
-			System.out.println("자세 데이터 저장 성공: " + savedData.getId());
+//			System.out.println("자세 데이터 저장 성공: " + savedData.getId());
 		} catch (Exception e) {
 			System.err.println("자세 데이터 저장 실패: " + e.getMessage());
 			e.printStackTrace();

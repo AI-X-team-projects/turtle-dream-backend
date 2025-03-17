@@ -40,7 +40,7 @@ public class PostureAIService {
             ResponseEntity<PostureData> response =
                     restTemplate.exchange(AI_SERVER_URL, HttpMethod.POST, requestEntity, PostureData.class);
 
-            System.out.println("AI 서버 응답: " + response.getStatusCode());
+//            System.out.println("AI 서버 응답: " + response.getStatusCode());
             return response.getBody();
         } catch (Exception e) {
             System.err.println("AI 서버 요청 실패: " + e.getMessage());
