@@ -13,10 +13,27 @@ spring:
   websocket:
     max-text-message-size: 10MB
     max-binary-message-size: 10MB
-    
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-name: ${GOOGLE_CLIENT_NAME}
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: ${GOOGLE_REDIRECT_URI}
+            authorization-grant-type: ${GOOGLE_AUTHORIZATION_GRANT_TYPE}
+            scope: ${GOOGLE_SCOPE}
+
 logging:
   level:
-    com.example.turtledreambackend: DEBUG  # 패키지별 로그 레벨 설정
+    com.example.turtledreambackend: DEBUG # 패키지별 로그 레벨 설정
     org.springframework.security: DEBUG
-    root: INFO  # 전체 로그 레벨 설정
+    root: INFO # 전체 로그 레벨 설정
+
+# 애플리케이션 설정
+app:
+  frontend:
+    url: http://localhost:3000 # 프론트엔드 URL
 

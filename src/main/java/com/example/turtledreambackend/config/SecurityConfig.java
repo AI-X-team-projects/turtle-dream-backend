@@ -1,70 +1,88 @@
 package com.example.turtledreambackend.config;
 
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-/**
- * 작성자 : 류재영
- * 작성일 : 2025-03-12
- *
- * security 설정을 위한 파일
- */
+import com.example.turtledreambackend.config.oauth2.OAuth2AuthenticationSuccessHandler;
+import com.example.turtledreambackend.service.OAuth2UserService;
 
+import lombok.RequiredArgsConstructor;
+
+/**
+ * 보안 설정 클래스
+ */
 @Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+	private final OAuth2UserService oAuth2UserService;
+	private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
+	/**
+	 * 비밀번호 인코더 빈
+	 * 
+	 * @return BCryptPasswordEncoder
+	 */
+	@Bean
+	public BCryptPasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	/**
+	 * 보안 필터 체인 설정
+	 * 
+	 * @param http HttpSecurity
+	 * @return SecurityFilterChain
+	 * @throws Exception 예외 발생 시
+	 */
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-				.csrf(csrf -> csrf.disable()) // CSRF 비활성화
-				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers(
-								"/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", // Swagger 관련 URL
-								"/api/user/register", "/api/user/login", "/api/user/logout", "/api/user/check-username", // 회원가입 & 로그인 URL
-								"/ws/**", "/ws/posture/**", // WebSocket 엔드포인트
-								"/api/posture/**", "/api/ai/**","https://api.openai.com/v1/chat/completions"
-						).permitAll() // 인증 없이 접근 허용
-						.anyRequest().authenticated() // 나머지 요청은 인증 필요
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+			.csrf(csrf -> csrf.disable())
+			.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/", "/error", "/main", "/api/user/**").permitAll()
+				.requestMatchers("/oauth2/**").permitAll()
+				.requestMatchers("/api/oauth2/**").permitAll()
+				.requestMatchers("/login/**").permitAll()
+				.anyRequest().authenticated()
+			)
+			.oauth2Login(oauth2 -> oauth2
+				.userInfoEndpoint(userInfo -> userInfo
+					.userService(oAuth2UserService)
 				)
-				.sessionManagement(session -> session
-						.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-				)
-				.logout(logout -> logout
-						.logoutUrl("/api/user/logout")
-						.invalidateHttpSession(true)
-						.deleteCookies("JSESSIONID")
-						.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()) // 리다이렉션 대신 상태 코드 반환
-						.permitAll()
-				);
+				.successHandler(oAuth2AuthenticationSuccessHandler)
+			);
 
 		return http.build();
 	}
-
+	
+	/**
+	 * CORS 설정
+	 * 
+	 * @return CorsConfigurationSource
+	 */
 	@Bean
-	public BCryptPasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder(12);
-	}
-
-	// CORS 설정을 Security와 통합
-	@Bean
-	public UrlBasedCorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration corsConfiguration = new CorsConfiguration();
-		corsConfiguration.addAllowedOrigin("http://localhost:3000"); // 프론트엔드 URL을 명시적으로 지정
-		corsConfiguration.addAllowedMethod("*"); // 모든 HTTP 메소드 허용 (GET, POST 등)
-		corsConfiguration.addAllowedHeader("*"); // 모든 요청 Header 허용
-		corsConfiguration.setAllowCredentials(true); // 쿠키 및 인증 정보 허용
-
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // 프론트엔드 URL
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		configuration.setAllowedHeaders(Arrays.asList("*"));
+		configuration.setAllowCredentials(true); // 쿠키 및 인증 정보 허용
+		configuration.setMaxAge(3600L); // 1시간 동안 preflight 요청 캐싱
+		
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", corsConfiguration); // 모든 엔드포인트에 CORS 설정 적용
-
+		source.registerCorsConfiguration("/**", configuration);
 		return source;
 	}
 }

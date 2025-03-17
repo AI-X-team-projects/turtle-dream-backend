@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class TurtleDreamBackendApplication {
 	
 	public static void main(String[] args) {
+		System.setProperty("spring.main.allow-circular-references", "true");
 		SpringApplication.run(TurtleDreamBackendApplication.class, args);
 	}
 	
