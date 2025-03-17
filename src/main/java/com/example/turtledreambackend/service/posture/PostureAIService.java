@@ -21,6 +21,7 @@ public class PostureAIService {
 
     private final RestTemplate restTemplate;
 
+    // 일단 ai 서버 하드코딩 했는데 추후 yml이나 env 파일에서 관리 하면 될 듯
     private static final String AI_SERVER_URL = "http://localhost:8001/analyze-posture";
 
     public PostureData analyzePosture(String userId, String imageData) {
