@@ -151,6 +151,7 @@ public class PostureController {
 
             while (uniqueTimes.size() < 12) { // 최대 12개의 데이터만 생성
                 int hour = random.nextInt(10) + 9; // 09:00 ~ 18:00 랜덤 시간 (9~18)
+//                int hour = random.nextInt(13) + 9; // 09:00 ~ 21:00 사이의 랜덤 시간 (9~21)
                 int minute = random.nextInt(60); // 00~59 랜덤 분
                 LocalDateTime recordedAt = localDate.atTime(hour, minute);
 
@@ -194,6 +195,7 @@ public class PostureController {
 
                 while (uniqueTimes.size() < 12) { // 하루에 최대 12개의 데이터
                     int hour = random.nextInt(10) + 9; // 09:00 ~ 18:00 랜덤 시간 (9~18)
+//                    int hour = random.nextInt(13) + 9; // 09:00 ~ 21:00 사이의 랜덤 시간 (9~21)
                     int minute = random.nextInt(60); // 00~59 랜덤 분
                     LocalDateTime recordedAt = localDate.atTime(hour, minute);
 
