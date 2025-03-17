@@ -138,6 +138,19 @@ public class PostureController {
     }
 
     /**
+     * 상위 3개 나쁜 자세 시간대 조회 API
+     */
+    @GetMapping("/badPostureHours")
+    public ResponseEntity<List<Map<String, Object>>> getTopBadPostureHours(
+            @RequestParam String userId,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+
+        List<Map<String, Object>> result = postureService.getTopBadPostureHours(userId, startDate, endDate);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
      * 테스트 데이터 저장용
      * */
     @PostMapping("/mock-daily")
