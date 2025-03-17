@@ -38,7 +38,7 @@ public class PostureService {
         LocalDateTime startOfDay = date.atStartOfDay(ZoneId.of("Asia/Seoul")).toLocalDateTime();
         LocalDateTime endOfDay = date.atTime(23, 59, 59).atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime();
 
-        System.out.println("조회 범위: " + startOfDay + " ~ " + endOfDay);
+//        System.out.println("조회 범위: " + startOfDay + " ~ " + endOfDay);
 
         return postureDataRepository.findByUserIdAndRecordedAtBetween(
                 userId, date.atStartOfDay(), date.plusDays(1).atStartOfDay());
@@ -63,10 +63,10 @@ public class PostureService {
             postureData.setRecordedAt(LocalDateTime.now());
         }
 
-        System.out.println("최종 저장할 recordedAt: " + postureData.getRecordedAt());
+//        System.out.println("최종 저장할 recordedAt: " + postureData.getRecordedAt());
 
         postureDataRepository.save(postureData);
-        System.out.println("AI 분석 데이터 저장 완료: " + postureData);
+//        System.out.println("AI 분석 데이터 저장 완료: " + postureData);
 
         // 요약 데이터 업데이트
         updatePostureSummary(postureData);
@@ -92,6 +92,6 @@ public class PostureService {
         }
 
         postureSummaryRepository.save(summary);
-        System.out.println("자세 요약 데이터 업데이트 완료: " + summary);
+//        System.out.println("자세 요약 데이터 업데이트 완료: " + summary);
     }
 }

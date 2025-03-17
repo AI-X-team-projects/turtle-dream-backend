@@ -42,13 +42,13 @@ public class PostureController {
             @RequestParam String userId,
             @RequestParam String date) {
 
-        System.out.println("요청 받음: userId=" + userId + ", date=" + date);
+//        System.out.println("요청 받음: userId=" + userId + ", date=" + date);
 
         LocalDate localDate = LocalDate.parse(date);
         List<PostureData> dataList = postureService.getDailyPostureData(userId, localDate);
 
 
-        System.out.println("조회된 데이터 개수: " + dataList.size());
+//        System.out.println("조회된 데이터 개수: " + dataList.size());
 
         // 데이터 변환 시 명확한 타입 지정
         List<Map<String, Object>> transformedData = dataList.stream().map(data -> {
@@ -60,7 +60,7 @@ public class PostureController {
             return map;
         }).toList();
 
-        System.out.println("변환된 데이터 개수: " + transformedData.size());
+//        System.out.println("변환된 데이터 개수: " + transformedData.size());
 
         return ResponseEntity.ok(transformedData);
     }
@@ -124,12 +124,12 @@ public class PostureController {
     @PostMapping("/save")
     public ResponseEntity<String> savePostureData(@RequestBody PostureData postureData) {
         try {
-            System.out.println("AI 분석 데이터 저장 요청 받음: " + postureData);
+//            System.out.println("AI 분석 데이터 저장 요청 받음: " + postureData);
             postureData.setRecordedAt(LocalDateTime.now());
-            System.out.println("자세 저장 날짜 : " + postureData.getRecordedAt());
-            System.out.println("사용자 아이디 : " + postureData.getUserId());
+//            System.out.println("자세 저장 날짜 : " + postureData.getRecordedAt());
+//            System.out.println("사용자 아이디 : " + postureData.getUserId());
             postureService.savePosture(postureData);
-            System.out.println("자세 데이터 저장 성공");
+//            System.out.println("자세 데이터 저장 성공");
             return ResponseEntity.ok("자세 데이터 저장 완료");
         } catch (Exception e) {
             System.err.println("데이터 저장 실패: " + e.getMessage());
