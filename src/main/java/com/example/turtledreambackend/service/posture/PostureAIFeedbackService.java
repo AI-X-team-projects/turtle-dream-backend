@@ -154,10 +154,14 @@ public class PostureAIFeedbackService {
         아래는 사용자의 통계 데이터입니다. 반드시 이 데이터를 바탕으로 피드백을 500토큰 이내로 작성하세요:
 
         %s
+        
+        아래의 상세 데이터를 참고하여, 사용자가 어느 시간대에 특히 나쁜 자세를 많이 하고 있었는지 분석 및 피드백 구간에서 피드백 해주세요.  
+        %s
+        
         """,
                 userId, userId,
                 totalDuration / 60, totalBadDuration / 60, badPercentage,
-                summaryData // ✅ 여기에 통계 데이터만!
+                summaryData, dataList.toString()
         );
 
         // ✅ 5. GPT 호출
