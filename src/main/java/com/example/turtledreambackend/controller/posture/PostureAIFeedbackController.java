@@ -29,7 +29,7 @@ public class PostureAIFeedbackController {
     // ✅ 월간 피드백
     @GetMapping("/monthly/{userId}")
     public String getMonthlyFeedback(
-            @RequestParam String userId,
+            @PathVariable String userId,
             @RequestParam(required = false) String startDate, // 날짜가 없으면 null
             @RequestParam(required = false) String endDate
     ) {
