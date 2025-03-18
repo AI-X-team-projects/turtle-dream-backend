@@ -154,7 +154,7 @@ public class PostureController {
      * 테스트 데이터 저장용
      * */
     @PostMapping("/mock-daily")
-    public ResponseEntity<String> generateMockDailyData(@RequestParam String userId, @RequestParam String date) {
+    public ResponseEntity<String> generateMockDailyData(@RequestParam("userId") String userId, @RequestParam("date") String date) {
         try {
             List<PostureData> mockDataList = new ArrayList<>();
             LocalDate localDate = LocalDate.parse(date);
@@ -195,7 +195,7 @@ public class PostureController {
     }
 
     @PostMapping("/mock-daily-range")
-    public ResponseEntity<String> generateMockDailyDataForRange(@RequestParam String userId) {
+    public ResponseEntity<String> generateMockDailyDataForRange(@RequestParam("userId") String userId) {
         try {
             List<PostureData> allMockData = new ArrayList<>();
             Random random = new Random();
