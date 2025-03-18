@@ -96,9 +96,9 @@ public class PostureAIFeedbackService {
         if (dataList.isEmpty()) return "해당 기간 동안 기록된 자세 데이터가 없습니다.";
 
         // 현재 시간 기준으로 5분 단위 Key 생성 ex) "user1-12:00"
-        String cacheKey = userId + "-" + LocalDateTime.now().getHour() + ":" + (LocalDateTime.now().getMinute() / 5) * 5;
+//        String cacheKey = userId + "-" + LocalDateTime.now().getHour() + ":" + (LocalDateTime.now().getMinute() / 5) * 5;
         // 이거는 1분 단위
-//        String cacheKey = userId + "-" + LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute();
+        String cacheKey = userId + "-" + LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute();
 
         // 캐싱된 값이 있으면 반환
         if (feedbackCache.containsKey(cacheKey)) {
