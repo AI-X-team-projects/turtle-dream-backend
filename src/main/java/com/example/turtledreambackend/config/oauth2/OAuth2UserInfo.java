@@ -3,8 +3,14 @@ package com.example.turtledreambackend.config.oauth2;
 import java.util.Map;
 
 /**
- * 소셜 로그인 제공자로부터 받은 사용자 정보를 표준화하기 위한 인터페이스
- */
+ * 최초 작성자 : 류재영
+ * 최초 작성일 : 2025-03-17
+ *
+ * OAuth2 사용자 정보를 추상화한 클래스
+ * 다양한 OAuth2 제공자(Google, Facebook 등)의 사용자 정보를 일관되게 처리하기 위한 추상 클래스입니다.
+ *
+ * */
+
 public interface OAuth2UserInfo {
     
     /**

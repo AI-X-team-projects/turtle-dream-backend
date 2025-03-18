@@ -12,8 +12,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
+ * 최초 작성자 : 류재영
+ * 최초 작성일 : 2025-03-17
+ *
  * OAuth2 인증 실패 시 처리를 담당하는 핸들러
- */
+ * 로그인 실패 시 오류 메시지와 함께 로그인 페이지로 리다이렉트하는 역할을 합니다.
+ *
+ * */
+
 @Component
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 

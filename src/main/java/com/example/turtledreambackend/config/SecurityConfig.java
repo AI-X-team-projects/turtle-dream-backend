@@ -18,8 +18,14 @@ import com.example.turtledreambackend.service.OAuth2UserService;
 import lombok.RequiredArgsConstructor;
 
 /**
+ * 최초 작성자 : 류재영
+ * 최초 작성일 : 2025-03-17
+ *
  * 보안 설정 클래스
- */
+ * OAuth2 로그인을 포함한 보안 관련 설정을 정의합니다.
+ *
+ * */
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor

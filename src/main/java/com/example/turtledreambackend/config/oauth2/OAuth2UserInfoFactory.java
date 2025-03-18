@@ -3,8 +3,14 @@ package com.example.turtledreambackend.config.oauth2;
 import java.util.Map;
 
 /**
- * OAuth2 제공자에 따라 적절한 OAuth2UserInfo 구현체를 생성하는 팩토리 클래스
- */
+ * 최초 작성자 : 류재영
+ * 최초 작성일 : 2025-03-17
+ *
+ * OAuth2 사용자 정보 처리를 위한 팩토리 클래스
+ * 제공자 타입에 따라 적절한 OAuth2UserInfo 구현체를 생성합니다.
+ *
+ * */
+
 public class OAuth2UserInfoFactory {
     
     /**

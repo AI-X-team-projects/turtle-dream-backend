@@ -21,8 +21,14 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * 최초 작성자 : 류재영
+ * 최초 작성일 : 2025-03-17
+ *
  * OAuth2 인증 성공 시 처리를 담당하는 핸들러
- */
+ * 로그인 성공 후 사용자 정보를 세션에 저장하고 프론트엔드로 리다이렉트하는 역할을 합니다.
+ *
+ * */
+
 @Component
 @Slf4j
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
