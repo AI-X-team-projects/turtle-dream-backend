@@ -51,12 +51,14 @@ public class SecurityConfig {
 			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/", "/error", "/main", "/api/user/**").permitAll()
-				.requestMatchers("/oauth2/**").permitAll()
-				.requestMatchers("/api/oauth2/**").permitAll()
-				.requestMatchers("/login/**").permitAll()
-				.requestMatchers("/api/posture/**").permitAll()
-				.requestMatchers("/api/ai/**").permitAll()
+					.requestMatchers(
+							"/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", // Swagger 관련 URL
+							"/api/user/register", "/api/user/login", "/api/user/logout", "/api/user/check-username", // 회원가입 & 로그인 URL
+							"/ws/**", "/ws/posture/**", // WebSocket 엔드포인트
+							"/api/posture/**", "/api/ai/**","https://api.openai.com/v1/chat/completions",
+							"/", "/error", "/main", "/api/user/**","/oauth2/**","/api/oauth2/**",
+							"/login/**"
+					).permitAll() // 인증 없이 접근 허용
 				.anyRequest().authenticated()
 			)
 			.oauth2Login(oauth2 -> oauth2
