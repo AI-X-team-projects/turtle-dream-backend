@@ -89,15 +89,26 @@ public class PostureAIFeedbackService {
 //        return generateFeedbackFromList(mockDataList, userId);
 //    }
 
+    // 캐싱용 Map 추가 (Key: "userId-시간대", Value: 캐싱된 피드백)
+    private final Map<String, String> feedbackCache = new HashMap<>();
+
     public String generateFeedbackFromList(List<PostureData> dataList, String userId) {
         if (dataList.isEmpty()) return "해당 기간 동안 기록된 자세 데이터가 없습니다.";
 
-        // ✅ 1. 총합 계산
-        int totalDuration = dataList.stream().mapToInt(PostureData::getTotalSessionDuration).sum(); // 총 교정 시간
-        int totalBadDuration = dataList.stream().mapToInt(PostureData::getBadPostureDuration).sum(); // 총 나쁜 자세 시간
-        int badPercentage = totalDuration > 0 ? (int) ((double) totalBadDuration / totalDuration * 100) : 0;
+        // 현재 시간 기준으로 5분 단위 Key 생성 ex) "user1-12:00"
+        String cacheKey = userId + "-" + LocalDateTime.now().getHour() + ":" + (LocalDateTime.now().getMinute() / 5) * 5;
+        // 이거는 1분 단위
+//        String cacheKey = userId + "-" + LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute();
 
-        // ✅ 2. 나쁜 자세 횟수, 좋은 자세 횟수 등 추가 통계
+        // 캐싱된 값이 있으면 반환
+        if (feedbackCache.containsKey(cacheKey)) {
+            return feedbackCache.get(cacheKey);
+        }
+
+        // 기존 통계 계산 로직 유지
+        int totalDuration = dataList.stream().mapToInt(PostureData::getTotalSessionDuration).sum();
+        int totalBadDuration = dataList.stream().mapToInt(PostureData::getBadPostureDuration).sum();
+        int badPercentage = totalDuration > 0 ? (int) ((double) totalBadDuration / totalDuration * 100) : 0;
         long goodPostureCount = dataList.stream().filter(PostureData::isGoodPosture).count();
         long badPostureCount = dataList.stream().filter(p -> !p.isGoodPosture()).count();
 
@@ -120,7 +131,7 @@ public class PostureAIFeedbackService {
                 badPostureCount
         );
 
-        // ✅ 4. 프롬프트 그대로 사용 + 통계만 추가
+        // ✅ 4. 기존 프롬프트 유지
         String prompt = String.format("""
         역할:
         당신은 AI 자세 교정 피드백 코치입니다. 사용자가 제공하는 JSON 데이터를 바탕으로, 사용자의 자세 데이터를 분석하고 친절하고 동기부여가 되는 피드백을 제공합니다. 
@@ -164,9 +175,15 @@ public class PostureAIFeedbackService {
                 summaryData, dataList.toString()
         );
 
-        // ✅ 5. GPT 호출
-        return callOpenAI(prompt, userId);
+        // ✅ 5. GPT 호출 (Rate Limit 초과 방지)
+        String feedback = callOpenAI(prompt, userId);
+
+        // 캐싱 저장 (5분간 유지)
+        feedbackCache.put(cacheKey, feedback);
+
+        return feedback;
     }
+
 
 
     // ✅ OpenAI API 호출
