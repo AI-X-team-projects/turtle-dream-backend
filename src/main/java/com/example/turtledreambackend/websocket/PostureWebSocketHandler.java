@@ -24,7 +24,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import lombok.RequiredArgsConstructor;
-
+/**
+ * 작성자 : 류재영
+ * 작성일 : 2025-03-13
+ *
+ * WebSocket 데이터 <-> AI 서버와 통신
+ */
 @Component
 @RequiredArgsConstructor
 public class PostureWebSocketHandler extends TextWebSocketHandler {
