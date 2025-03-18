@@ -9,8 +9,12 @@ import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.annotation.PostConstruct;
 
 /**
+ *  * 최초 작성자 : 류재영
+ *  * 최초 작성일 : 2025-03-17
+ *
  * 환경 변수를 로드하는 설정 클래스
- */
+ *
+ **/
 @Configuration
 public class EnvConfig {
 
