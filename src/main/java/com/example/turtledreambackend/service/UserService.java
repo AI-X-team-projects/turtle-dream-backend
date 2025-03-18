@@ -15,8 +15,12 @@ import com.example.turtledreambackend.data.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
+ *  * 작성자 : 류재영
+ *  * 작성일 : 2025-03-12
+ *
  * 사용자 관련 서비스
- */
+ *
+ **/
 @RequiredArgsConstructor
 @Service
 public class UserService {
