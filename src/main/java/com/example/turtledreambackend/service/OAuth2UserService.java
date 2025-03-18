@@ -26,8 +26,14 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
 /**
- * OAuth2 인증 처리를 위한 서비스 클래스
- */
+ * 최초 작성자 : 류재영
+ * 최초 작성일 : 2025-03-17
+ *
+ * OAuth2 사용자 서비스
+ * OAuth2 인증 과정에서 사용자 정보를 로드하고 처리하는 역할을 합니다.
+ *
+ * */
+
 @Service
 @RequiredArgsConstructor
 public class OAuth2UserService extends DefaultOAuth2UserService {

@@ -3,8 +3,14 @@ package com.example.turtledreambackend.config.oauth2;
 import java.util.Map;
 
 /**
+ * 최초 작성자 : 류재영
+ * 최초 작성일 : 2025-03-17
+ *
  * Google OAuth2 사용자 정보 구현체
- */
+ * Google에서 제공하는 사용자 정보의 구조에 맞게 OAuth2UserInfo를 구현합니다.
+ *
+ * */
+
 public class GoogleOAuth2UserInfo implements OAuth2UserInfo {
     
     private final Map<String, Object> attributes;

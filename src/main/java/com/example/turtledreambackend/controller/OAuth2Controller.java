@@ -30,8 +30,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * OAuth2 로그인 관련 컨트롤러
- */
+ * 최초 작성자 : 류재영
+ * 최초 작성일 : 2025-03-17
+ *
+ * OAuth2 인증 요청을 처리하는 컨트롤러
+ * 구글 등의 OAuth2 제공자로 인증 요청을 리다이렉트하는 엔드포인트를 제공합니다.
+ *
+ * */
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
